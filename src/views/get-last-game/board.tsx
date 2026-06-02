@@ -30,6 +30,8 @@ const PIECE_NAMES: Record<string, string> = {
   p: "pawn",
 };
 
+const FILES = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
 export function Board({ fen, flip = false }: { fen: string; flip?: boolean }) {
   const base = fenToRows(fen);
   const rows = flip
@@ -41,13 +43,30 @@ export function Board({ fen, flip = false }: { fen: string; flip?: boolean }) {
         row.map((piece, c) => {
           const dark = (r + c) % 2 === 1;
           const isWhitePiece = piece !== "" && piece === piece.toUpperCase();
+          const rank = flip ? r + 1 : 8 - r;
+          const file = flip ? FILES[7 - c] : FILES[c];
+          const labelColor = dark ? "text-emerald-50" : "text-emerald-700/80";
           return (
             <div
               key={`${r}-${c}`}
-              className={`flex aspect-square items-center justify-center ${
+              className={`relative flex aspect-square items-center justify-center ${
                 dark ? "bg-emerald-700/80" : "bg-emerald-50"
               }`}
             >
+              {c === 0 && (
+                <span
+                  className={`absolute left-[6%] top-[4%] text-[0.6rem] font-semibold leading-none ${labelColor}`}
+                >
+                  {rank}
+                </span>
+              )}
+              {r === 7 && (
+                <span
+                  className={`absolute bottom-[4%] right-[6%] text-[0.6rem] font-semibold leading-none ${labelColor}`}
+                >
+                  {file}
+                </span>
+              )}
               {piece && (
                 <img
                   src={
