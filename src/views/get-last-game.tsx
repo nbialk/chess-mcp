@@ -9,13 +9,25 @@ import {
   ExternalLink,
   Rabbit,
   SearchX,
-  Swords,
   Timer,
+  Trophy,
   Zap,
 } from "lucide-react";
 import { type ComponentType, useState } from "react";
 import { useLayout, useOpenExternal } from "skybridge/web";
 import { useToolInfo } from "../helpers.js";
+import bishop from "@/assets/pieces/bishop.png";
+import king from "@/assets/pieces/king.png";
+import knight from "@/assets/pieces/knight.png";
+import pawn from "@/assets/pieces/pawn.png";
+import queen from "@/assets/pieces/queen.png";
+import rook from "@/assets/pieces/rook.png";
+import bishopWhite from "@/assets/pieces/bishop-white.png";
+import kingWhite from "@/assets/pieces/king-white.png";
+import knightWhite from "@/assets/pieces/knight-white.png";
+import pawnWhite from "@/assets/pieces/pawn-white.png";
+import queenWhite from "@/assets/pieces/queen-white.png";
+import rookWhite from "@/assets/pieces/rook-white.png";
 
 const TIME_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   blitz: Zap,
@@ -30,19 +42,22 @@ const RESULT_STYLES = {
   loss: { label: "Loss", className: "bg-rose-600 text-white" },
 } as const;
 
-const PIECES: Record<string, string> = {
-  K: "\u2654",
-  Q: "\u2655",
-  R: "\u2656",
-  B: "\u2657",
-  N: "\u2658",
-  P: "\u2659",
-  k: "\u265A",
-  q: "\u265B",
-  r: "\u265C",
-  b: "\u265D",
-  n: "\u265E",
-  p: "\u265F",
+const PIECE_IMAGES: Record<string, { white: string; black: string }> = {
+  k: { white: kingWhite, black: king },
+  q: { white: queenWhite, black: queen },
+  r: { white: rookWhite, black: rook },
+  b: { white: bishopWhite, black: bishop },
+  n: { white: knightWhite, black: knight },
+  p: { white: pawnWhite, black: pawn },
+};
+
+const PIECE_NAMES: Record<string, string> = {
+  k: "king",
+  q: "queen",
+  r: "rook",
+  b: "bishop",
+  n: "knight",
+  p: "pawn",
 };
 
 function fenToRows(fen: string): string[][] {
@@ -60,10 +75,13 @@ function fenToRows(fen: string): string[][] {
   });
 }
 
-function Board({ fen }: { fen: string }) {
-  const rows = fenToRows(fen);
+function Board({ fen, flip = false }: { fen: string; flip?: boolean }) {
+  const base = fenToRows(fen);
+  const rows = flip
+    ? base.map((row) => [...row].reverse()).reverse()
+    : base;
   return (
-    <div className="mx-auto grid aspect-square w-full max-w-[20rem] grid-cols-8 overflow-hidden rounded-md border border-border">
+    <div className="mx-auto grid aspect-square w-full max-w-[20rem] grid-cols-8 grid-rows-8 overflow-hidden rounded-md border border-border">
       {rows.map((row, r) =>
         row.map((piece, c) => {
           const dark = (r + c) % 2 === 1;
@@ -71,24 +89,57 @@ function Board({ fen }: { fen: string }) {
           return (
             <div
               key={`${r}-${c}`}
-              className={`flex items-center justify-center ${
+              className={`flex aspect-square items-center justify-center ${
                 dark ? "bg-emerald-700/80" : "bg-emerald-50"
               }`}
             >
               {piece && (
-                <span
-                  className={`text-[clamp(1rem,5vw,1.75rem)] leading-none ${
-                    isWhitePiece
-                      ? "text-white [text-shadow:0_1px_1px_rgba(0,0,0,0.5)]"
-                      : "text-zinc-900"
-                  }`}
-                >
-                  {PIECES[piece]}
-                </span>
+                <img
+                  src={
+                    PIECE_IMAGES[piece.toLowerCase()][
+                      isWhitePiece ? "white" : "black"
+                    ]
+                  }
+                  alt={`${isWhitePiece ? "white" : "black"} ${PIECE_NAMES[piece.toLowerCase()]}`}
+                  className="h-[78%] w-[78%] select-none object-contain"
+                  draggable={false}
+                />
               )}
             </div>
           );
         }),
+      )}
+    </div>
+  );
+}
+
+function PlayerBar({
+  name,
+  rating,
+  color,
+  isWinner,
+}: {
+  name: string;
+  rating: number | null;
+  color: "white" | "black";
+  isWinner: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-2 type-text-sm">
+      <span
+        aria-hidden
+        className={`size-4 shrink-0 rounded-full border ${
+          color === "white"
+            ? "border-zinc-300 bg-white"
+            : "border-zinc-600 bg-zinc-900"
+        }`}
+      />
+      <span className="font-medium">@{name}</span>
+      {rating != null && (
+        <span className="text-muted-foreground">({rating})</span>
+      )}
+      {isWinner && (
+        <Trophy className="size-3.5 shrink-0 text-amber-500" aria-label="Winner" />
       )}
     </div>
   );
@@ -157,6 +208,13 @@ export default function GetLastGame() {
     ? g.timeClass[0].toUpperCase() + g.timeClass.slice(1)
     : null;
 
+  const userColor = g.color as "white" | "black";
+  const opponentColor = userColor === "white" ? "black" : "white";
+  // Flip the board so the searched player is always at the bottom.
+  const flip = userColor === "black";
+  const userWon = g.result === "win";
+  const opponentWon = g.result === "loss";
+
   return wrap(
     <div className="flex flex-col">
       {/* Header */}
@@ -178,28 +236,24 @@ export default function GetLastGame() {
         </div>
       </div>
 
-      {/* Matchup */}
-      <div className="flex items-center gap-2 p-5 type-text-sm">
-        <Swords className="size-4 shrink-0 text-muted-foreground" />
-        <span className="font-medium">
-          @{output.username}
-          {g.userRating != null && (
-            <span className="text-muted-foreground"> ({g.userRating})</span>
-          )}
-        </span>
-        <span className="text-muted-foreground">vs</span>
-        <span className="font-medium">
-          @{g.opponent}
-          {g.opponentRating != null && (
-            <span className="text-muted-foreground"> ({g.opponentRating})</span>
-          )}
-        </span>
-      </div>
-
-      {/* Board + move navigation */}
+      {/* Board + player bars + move navigation */}
       {positions.length > 1 && (
-        <div className="flex flex-col gap-3 px-5 pb-5">
-          <Board fen={positions[current]} />
+        <div className="flex flex-col gap-3 p-5">
+          {/* Opponent (top) */}
+          <PlayerBar
+            name={g.opponent ?? "opponent"}
+            rating={g.opponentRating}
+            color={opponentColor}
+            isWinner={opponentWon}
+          />
+          <Board fen={positions[current]} flip={flip} />
+          {/* Searched player (bottom) */}
+          <PlayerBar
+            name={output.username}
+            rating={g.userRating}
+            color={userColor}
+            isWinner={userWon}
+          />
           <div className="flex items-center justify-center gap-2">
             <button
               type="button"
@@ -243,6 +297,24 @@ export default function GetLastGame() {
               <ChevronsRight className="size-4" />
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Player matchup fallback when no board is available */}
+      {positions.length <= 1 && (
+        <div className="flex flex-col gap-2 p-5">
+          <PlayerBar
+            name={output.username}
+            rating={g.userRating}
+            color={userColor}
+            isWinner={userWon}
+          />
+          <PlayerBar
+            name={g.opponent ?? "opponent"}
+            rating={g.opponentRating}
+            color={opponentColor}
+            isWinner={opponentWon}
+          />
         </div>
       )}
 
