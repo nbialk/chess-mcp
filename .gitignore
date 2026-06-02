@@ -4,6 +4,7 @@ dist/
 .DS_store
 *.tsbuildinfo
 .skybridge/
+.vercel/
 
 
 .agents/
