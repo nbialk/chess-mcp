@@ -15,7 +15,10 @@ const server = new McpServer(
       description:
         "Look up a Chess.com player by username and show their profile and game statistics (rapid, blitz, bullet ratings and win/loss records).",
       inputSchema: {
-        username: z.string().describe("The Chess.com username to look up."),
+        username: z
+          .string()
+          .default("magnuscarlsen")
+          .describe("The Chess.com username to look up. Default: magnuscarlsen."),
       },
       annotations: {
         title: "Get Chess.com player stats",
@@ -116,7 +119,10 @@ const server = new McpServer(
       description:
         "Look up a Chess.com player's most recent game and show the result, opponent, opening, and how the game ended.",
       inputSchema: {
-        username: z.string().describe("The Chess.com username to look up."),
+        username: z
+          .string()
+          .default("magnuscarlsen")
+          .describe("The Chess.com username to look up. Default: magnuscarlsen."),
       },
       annotations: {
         title: "Get Chess.com last game",
