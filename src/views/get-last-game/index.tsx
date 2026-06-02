@@ -10,7 +10,7 @@ import {
   Play,
   SearchX,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLayout, useOpenExternal } from "skybridge/web";
 import { useToolInfo } from "../../helpers.js";
 import { Board } from "./board.js";
@@ -27,28 +27,6 @@ export default function GetLastGame() {
   const positions = game?.positions ?? [];
   const [ply, setPly] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const leftColRef = useRef<HTMLDivElement>(null);
-  const [leftHeight, setLeftHeight] = useState<number | undefined>();
-  const [sideBySide, setSideBySide] = useState(false);
-
-  // Match the moves panel height to the board column (only matters side-by-side).
-  useEffect(() => {
-    const el = leftColRef.current;
-    if (!el) return;
-    const update = () => setLeftHeight(el.offsetHeight);
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 640px)");
-    const update = () => setSideBySide(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
 
   // null = follow the latest position (final move).
   const maxPly = Math.max(0, positions.length - 1);
@@ -141,9 +119,9 @@ export default function GetLastGame() {
 
       {/* Board + player bars + move navigation */}
       {positions.length > 1 && (
-        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start">
+        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-stretch">
           {/* Left: board with player bars */}
-          <div ref={leftColRef} className="flex flex-col gap-3 sm:flex-1">
+          <div className="flex flex-col gap-3 sm:flex-1">
             <PlayerBar
               name={g.opponent ?? "opponent"}
               rating={g.opponentRating}
@@ -159,24 +137,23 @@ export default function GetLastGame() {
             />
           </div>
 
-          {/* Right: moves panel + navigation (Chess.com-style) */}
-          <div
-            className="flex min-h-0 flex-col gap-2 sm:w-56"
-            style={
-              sideBySide && leftHeight ? { height: leftHeight } : undefined
-            }
-          >
-            <MovesPanel
-              opening={g.opening}
-              termination={g.termination}
-              moves={g.moves}
-              current={current}
-              onSelect={(p) => {
-                setIsPlaying(false);
-                goto(p);
-              }}
-            />
-            <div className="flex shrink-0 items-center justify-center gap-1.5">
+          {/* Right: moves panel + navigation (Chess.com-style).
+              `sm:relative` + absolute inner wrapper keeps the moves list from
+              inflating the column: the board column alone drives the row
+              height, and the panel fills it via stretch. No JS measurement. */}
+          <div className="sm:relative sm:w-56">
+            <div className="flex min-h-0 flex-col gap-2 sm:absolute sm:inset-0">
+              <MovesPanel
+                opening={g.opening}
+                termination={g.termination}
+                moves={g.moves}
+                current={current}
+                onSelect={(p) => {
+                  setIsPlaying(false);
+                  goto(p);
+                }}
+              />
+              <div className="flex shrink-0 items-center justify-center gap-1.5">
               <button
                 type="button"
                 onClick={() => {
@@ -238,6 +215,7 @@ export default function GetLastGame() {
                 <ChevronsRight className="size-4" />
               </button>
             </div>
+          </div>
           </div>
         </div>
       )}
