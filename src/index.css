@@ -5,6 +5,18 @@
 
 @source "../node_modules/@alpic-ai/ui/src";
 
+/* The component renders inside an iframe. The alpic theme sets
+   `body { background: var(--color-background); }`, but the `.dark` class lives
+   on the inner wrapper div, so `body` always resolves to the light background
+   (white) and shows through around the card. Keep the iframe root transparent
+   so the card blends into the host surface in both light and dark themes. */
+@layer base {
+  html,
+  body {
+    background: transparent;
+  }
+}
+
 @theme {
   --font-mozilla: "Mozilla Text", serif;
   --animate-float: float 3s ease-in-out infinite;
