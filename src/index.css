@@ -17,6 +17,27 @@
   }
 }
 
+/* Slim, modern scrollbar: thin thumb, no track background. */
+@utility scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in oklab, currentColor 25%, transparent) transparent;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, currentColor 22%, transparent);
+    border-radius: 9999px;
+  }
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, currentColor 38%, transparent);
+  }
+}
+
 @theme {
   --font-mozilla: "Mozilla Text", serif;
   --animate-float: float 3s ease-in-out infinite;
