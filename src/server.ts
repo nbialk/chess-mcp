@@ -2,6 +2,50 @@ import { Chess } from "chess.js";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 
+const modeSchema = z
+  .object({
+    rating: z.number().nullable(),
+    best: z.number().nullable(),
+    win: z.number(),
+    loss: z.number(),
+    draw: z.number(),
+  })
+  .nullable();
+
+const playerSchema = z.object({
+  username: z.string(),
+  name: z.string().nullable(),
+  title: z.string().nullable(),
+  country: z.string().nullable(),
+  location: z.string().nullable(),
+  followers: z.number(),
+  status: z.string().nullable(),
+  league: z.string().nullable(),
+  joined: z.number().nullable(),
+  lastOnline: z.number().nullable(),
+  url: z.string(),
+  fide: z.number().nullable(),
+  rapid: modeSchema,
+  blitz: modeSchema,
+  bullet: modeSchema,
+});
+
+const lastGameSchema = z.object({
+  result: z.enum(["win", "draw", "loss"]),
+  color: z.enum(["white", "black"]),
+  userRating: z.number().nullable(),
+  opponent: z.string().nullable(),
+  opponentRating: z.number().nullable(),
+  timeClass: z.string().nullable(),
+  rated: z.boolean().nullable(),
+  endTime: z.number().nullable(),
+  opening: z.string().nullable(),
+  termination: z.string().nullable(),
+  url: z.string().nullable(),
+  positions: z.array(z.string()),
+  moves: z.array(z.string()),
+});
+
 const server = new McpServer(
   {
     name: "chess-app",
@@ -20,9 +64,15 @@ const server = new McpServer(
           .default("magnuscarlsen")
           .describe("The Chess.com username to look up. Default: magnuscarlsen."),
       },
+      outputSchema: {
+        found: z.boolean(),
+        username: z.string().optional(),
+        player: playerSchema.optional(),
+      },
       annotations: {
         title: "Get Chess.com player stats",
         readOnlyHint: true,
+        idempotentHint: true,
         destructiveHint: false,
         openWorldHint: true,
       },
@@ -124,9 +174,15 @@ const server = new McpServer(
           .default("magnuscarlsen")
           .describe("The Chess.com username to look up. Default: magnuscarlsen."),
       },
+      outputSchema: {
+        found: z.boolean(),
+        username: z.string().optional(),
+        game: lastGameSchema.optional(),
+      },
       annotations: {
         title: "Get Chess.com last game",
         readOnlyHint: true,
+        idempotentHint: true,
         destructiveHint: false,
         openWorldHint: true,
       },
