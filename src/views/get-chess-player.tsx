@@ -104,7 +104,7 @@ export default function GetChessPlayer() {
 
   const wrap = (children: React.ReactNode) => (
     <div
-      className={`${theme === "dark" ? "dark" : ""} mx-auto w-full max-w-xl overflow-hidden rounded-xl border border-border bg-background text-foreground`}
+      className={`${theme === "dark" ? "dark" : ""} w-full overflow-hidden bg-background text-foreground`}
     >
       {children}
     </div>
