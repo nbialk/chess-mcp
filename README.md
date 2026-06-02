@@ -87,6 +87,14 @@ Skybridge is infrastructure vendor agnostic, and your app can be deployed on any
 
 The simplest way to deploy your app is by running the `deploy` command, which will push your MCP server to the [Alpic](https://alpic.ai/) cloud for free.
 
+### Production MCP Server
+
+The deployed MCP server is available at:
+
+```
+https://nb-skybridge-chess-76710f5a.alpic.live/
+```
+
 ## Resources
 - [Skybridge Documentation](https://docs.skybridge.tech/)
 - [Apps SDK Documentation](https://developers.openai.com/apps-sdk)
