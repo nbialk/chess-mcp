@@ -5,16 +5,18 @@
 
 @source "../node_modules/@alpic-ai/ui/src";
 
-/* The component renders inside an iframe. The alpic theme sets
-   `body { background: var(--color-background); }`, but the `.dark` class lives
+/* The component renders inside a host-owned iframe. The alpic theme sets
+   `@layer base { body { @apply bg-background } }`, but the `.dark` class lives
    on the inner wrapper div, so `body` always resolves to the light background
-   (white) and shows through around the card. Keep the iframe root transparent
-   so the card blends into the host surface in both light and dark themes. */
-@layer base {
-  html,
-  body {
-    background: transparent;
-  }
+   (white) and shows through around the card. This rule is intentionally left
+   outside `@layer base`: unlayered rules always beat layered ones, so the
+   transparent root wins over the theme regardless of source order.
+   `color-scheme: normal` stops the browser from painting a white default
+   canvas for the iframe, which `background: transparent` alone leaves behind. */
+html,
+body {
+  background: transparent;
+  color-scheme: normal;
 }
 
 /* Slim, modern scrollbar: thin thumb, no track background. */
