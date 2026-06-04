@@ -17,7 +17,8 @@
 
 ### Prerequisites
 
-- Node.js 24+
+- Node.js 24.14.1+
+- pnpm 9+
 
 ### Local Development
 
@@ -74,4 +75,6 @@ pnpm build
 
 ## License
 
-[MIT](./LICENSE)
+The source code is released under the [Beerware License](./LICENSE).
+
+The chess piece icons are from the ["Chess" pack on Flaticon](https://www.flaticon.com/packs/chess-75) and are used under the Flaticon Free License — they are not covered by the Beerware license. See [NOTICE](./NOTICE) for details.

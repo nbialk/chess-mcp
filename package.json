@@ -1,7 +1,7 @@
 {
-  "name": "nb-skybridge-chess",
+  "name": "chess-mcp",
   "version": "0.0.1",
-  "license": "MIT",
+  "license": "Beerware",
   "description": "Chess.com player and game stats app",
   "type": "module",
   "packageManager": "pnpm@9.15.9",
