@@ -1,6 +1,6 @@
 {
   "name": "chess-mcp",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "license": "Beerware",
   "description": "Chess.com player and game stats app",
   "type": "module",
@@ -16,6 +16,7 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "chess.js": "^1.4.0",
     "lucide-react": "^1.14.0",
+    "posthog-node": "^5.35.14",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "skybridge": "^1.0.3",

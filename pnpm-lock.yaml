@@ -17,6 +17,9 @@ dependencies:
   lucide-react:
     specifier: ^1.14.0
     version: 1.17.0(react@19.2.7)
+  posthog-node:
+    specifier: ^5.35.14
+    version: 5.35.14
   react:
     specifier: ^19.2.4
     version: 19.2.7
@@ -890,14 +893,14 @@ packages:
   /@oxc-project/types@0.133.0:
     resolution: {integrity: sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA==}
 
-  /@posthog/core@1.30.2:
-    resolution: {integrity: sha512-d7RTpfi+/q5+SZ+4f1WhanfEtNBz9onMmUxn3BO0GDT8N5ZT4DEP3LqFisqeP+xkJTaFPWCOVA/nGyKmUX9y9g==}
+  /@posthog/core@1.30.5:
+    resolution: {integrity: sha512-NGBRhqyMOpiSKd8xtg8dckUxh+kB02LdtnxKYW7ngycJmgM4GBGzSDaATbMQDKaNS9m2FJ9QRZ8nJyelGCoqNQ==}
     dependencies:
-      '@posthog/types': 1.378.1
+      '@posthog/types': 1.379.2
     dev: false
 
-  /@posthog/types@1.378.1:
-    resolution: {integrity: sha512-bKOXVWySe5oKFjV6X9VW9jngIm14d4BvnT7l/Eb7e6DrT5uD+XclvbRdhC5f1/l5KwoIU+qswBobHRPlix2D1w==}
+  /@posthog/types@1.379.2:
+    resolution: {integrity: sha512-quGXOeNewmaGqTxE/eH8MgM/niW1jfgCyzh4bwpXFpDwuQPvWA8WkCFo6k1oKGYV03Go0udw49aGUz6s58cRsA==}
     dev: false
 
   /@radix-ui/number@1.1.1:
@@ -3566,8 +3569,8 @@ packages:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  /posthog-node@5.35.11:
-    resolution: {integrity: sha512-HDgHr5eRmR9AYxoNCM5pyn2T/CLF4rjuYzgAo6BVopXBFrpyTVEt5+B9DxK2lKhsrIZTzg5bJ4G0VdPA139P9A==}
+  /posthog-node@5.35.14:
+    resolution: {integrity: sha512-vUO4/MQ+edqSua4jAQY+H8wvVMFOZNoBt72dqnxGkqgES0awW0NPFdDSfEhGhS6BSkydNFkN/4crnOksbCnFlQ==}
     engines: {node: ^20.20.0 || >=22.22.0}
     peerDependencies:
       rxjs: ^7.0.0
@@ -3575,7 +3578,7 @@ packages:
       rxjs:
         optional: true
     dependencies:
-      '@posthog/core': 1.30.2
+      '@posthog/core': 1.30.5
     dev: false
 
   /powershell-utils@0.1.0:
@@ -3895,7 +3898,7 @@ packages:
       ink: 7.0.5(@types/react@19.2.16)(react@19.2.7)
       nodemon: 3.1.14
       open: 11.0.0
-      posthog-node: 5.35.11
+      posthog-node: 5.35.14
       react: 19.2.7
       react-dom: 19.2.7(react@19.2.7)
       superjson: 2.2.6

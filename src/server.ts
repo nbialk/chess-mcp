@@ -1,6 +1,13 @@
+// Cloud Run injects PORT; Skybridge listens on __PORT. Bridge them before the
+// server reads its listen port.
+if (process.env.PORT && !process.env.__PORT) {
+  process.env.__PORT = process.env.PORT;
+}
+
 import { Chess } from "chess.js";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
+import { captureToolCall, shutdownAnalytics } from "./analytics.js";
 
 const modeSchema = z
   .object({
@@ -319,9 +326,45 @@ const server = new McpServer(
     },
   );
 
+server.mcpMiddleware("tools/call", async (request, extra, next) => {
+  const start = Date.now();
+  const tool = String(request.params?.name ?? "unknown");
+  const args = request.params?.arguments as Record<string, unknown> | undefined;
+  const distinctId = extra?.sessionId;
+
+  try {
+    const result = await next();
+    captureToolCall({
+      tool,
+      durationMs: Date.now() - start,
+      success: result?.isError !== true,
+      distinctId,
+      properties: { username: args?.username ?? null },
+    });
+    return result;
+  } catch (err) {
+    captureToolCall({
+      tool,
+      durationMs: Date.now() - start,
+      success: false,
+      distinctId,
+      properties: { username: args?.username ?? null, error: String(err) },
+    });
+    throw err;
+  }
+});
+
 if (process.env.NODE_ENV === "production") {
   const { default: manifest } = await import("./vite-manifest.js");
   server.setViteManifest(manifest);
+}
+
+// Flush buffered analytics on shutdown so Cloud Run container stops don't drop
+// events.
+for (const signal of ["SIGTERM", "SIGINT"] as const) {
+  process.once(signal, () => {
+    void shutdownAnalytics().finally(() => process.exit(0));
+  });
 }
 
 export default await server.run();

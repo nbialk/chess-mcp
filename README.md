@@ -58,13 +58,67 @@ Test the app locally using the DevTools UI at `http://localhost:3000` while runn
 
 To connect with web clients like ChatGPT or Claude, expose your server with the `--tunnel` flag (`pnpm dev:tunnel`). See the [test guide](https://docs.skybridge.tech/quickstart/test-your-app).
 
-## Deploy
+## Analytics
 
-Skybridge is infrastructure agnostic and can be deployed on any cloud platform supporting MCP. A `Dockerfile` is included for container-based deployments (e.g. Google Cloud Run).
+Tool calls can be tracked with [PostHog](https://posthog.com). Tracking is
+wired as MCP middleware in `src/server.ts` and is a **no-op** unless
+`POSTHOG_API_KEY` is set, so forks and local development send no events.
+
+Copy `.env.example` to `.env` and set the keys to enable it locally:
 
 ```bash
-pnpm build
+cp .env.example .env
 ```
+
+Use the PostHog **Project** API Key (`phc_...`), never a Personal API Key. No
+key value is ever committed — only read from the environment.
+
+## Deploy
+
+Deployments target **Google Cloud Run** and are driven by SemVer release tags.
+
+### Release flow
+
+1. Land changes on `main` using [Conventional Commits](https://www.conventionalcommits.org/)
+   (`feat:` → minor, `fix:` → patch, `feat!:`/`BREAKING CHANGE:` → major).
+2. [`release-please`](https://github.com/googleapis/release-please) opens a
+   release PR with the version bump and `CHANGELOG.md`.
+3. Merging that PR creates a `vX.Y.Z` tag and GitHub Release.
+4. The tag triggers `.github/workflows/deploy.yml`, which builds the image,
+   pushes it to Artifact Registry (tagged `X.Y.Z` and `latest`), and deploys to
+   Cloud Run.
+
+### One-time GCP setup
+
+- Enable APIs: `run`, `cloudbuild`, `artifactregistry`, `iamcredentials`,
+  `secretmanager`.
+- Create an Artifact Registry Docker repo named `chess-mcp`.
+- Set up [Workload Identity Federation](https://github.com/google-github-actions/auth#preferred-direct-workload-identity-federation)
+  for GitHub Actions and a service account with roles `run.admin`,
+  `artifactregistry.writer`, `iam.serviceAccountUser`, and
+  `secretmanager.secretAccessor`.
+- Store the PostHog project key in Secret Manager as `posthog-api-key`.
+
+### GitHub configuration
+
+Repository **secrets**: `GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`,
+`GCP_SERVICE_ACCOUNT`.
+
+Repository **variables**: `GCP_REGION`, `POSTHOG_HOST` (e.g.
+`https://eu.i.posthog.com`).
+
+### Custom domain
+
+Map your domain via Cloud Run (managed TLS is provisioned automatically):
+
+```bash
+gcloud run domain-mappings create \
+  --service chess-mcp \
+  --domain chess.niklas.sh \
+  --region "$GCP_REGION"
+```
+
+Then add the DNS records that the command prints to your DNS provider.
 
 ## Resources
 
