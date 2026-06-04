@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://docs.skybridge.tech"><img src="https://img.shields.io/badge/Skybridge-1.0.3-2563eb?style=flat-square&logo=react&logoColor=white" alt="Skybridge" /></a>
-  <a href="https://mcp.chess.niklas.sh/mcp"><img src="https://img.shields.io/badge/MCP-mcp.chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="MCP endpoint" /></a>
+  <a href="https://chess.niklas.sh"><img src="https://img.shields.io/badge/Demo-chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="Live demo" /></a>
 </p>
 
 
