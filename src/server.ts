@@ -4,6 +4,7 @@ if (process.env.PORT && !process.env.__PORT) {
   process.env.__PORT = process.env.PORT;
 }
 
+import { readFile } from "node:fs/promises";
 import { Chess } from "chess.js";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
@@ -352,6 +353,26 @@ server.mcpMiddleware("tools/call", async (request, extra, next) => {
     });
     throw err;
   }
+});
+
+// Serve a favicon so MCP clients (e.g. Claude) show the app icon instead of
+// falling back to the root domain's favicon.
+const faviconUrl = new URL("./assets/favicon.ico", import.meta.url);
+const faviconPromise = readFile(faviconUrl).catch(() => null);
+type FaviconResponse = {
+  status(code: number): { end(): void };
+  set(field: string, value: string): void;
+  send(body: Buffer): void;
+};
+server.express.get("/favicon.ico", async (_req: unknown, res: FaviconResponse) => {
+  const favicon = await faviconPromise;
+  if (!favicon) {
+    res.status(404).end();
+    return;
+  }
+  res.set("Content-Type", "image/x-icon");
+  res.set("Cache-Control", "public, max-age=86400");
+  res.send(favicon);
 });
 
 if (process.env.NODE_ENV === "production") {
