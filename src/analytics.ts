@@ -13,26 +13,42 @@ if (apiKey) {
   });
 }
 
-type ToolCallEvent = {
-  tool: string;
+type McpRequestEvent = {
+  method: string;
   durationMs: number;
   success: boolean;
   distinctId?: string;
   properties?: Record<string, unknown>;
 };
 
-export function captureToolCall(event: ToolCallEvent): void {
+export function captureMcpRequest(event: McpRequestEvent): void {
   if (!client) return;
 
   client.capture({
     distinctId: event.distinctId ?? "anonymous",
-    event: "mcp_tool_called",
+    event: "mcp_request",
     properties: {
-      tool: event.tool,
+      method: event.method,
       duration_ms: event.durationMs,
       success: event.success,
       app_version: process.env.APP_VERSION ?? null,
       ...event.properties,
+    },
+  });
+}
+
+export function identifyClient(
+  distinctId: string,
+  clientName: string | null,
+  clientVersion: string | null,
+): void {
+  if (!client) return;
+
+  client.identify({
+    distinctId,
+    properties: {
+      mcp_client_name: clientName,
+      mcp_client_version: clientVersion,
     },
   });
 }

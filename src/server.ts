@@ -8,7 +8,11 @@ import { readFile } from "node:fs/promises";
 import { Chess } from "chess.js";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
-import { captureToolCall, shutdownAnalytics } from "./analytics.js";
+import {
+  captureMcpRequest,
+  identifyClient,
+  shutdownAnalytics,
+} from "./analytics.js";
 
 const modeSchema = z
   .object({
@@ -336,29 +340,49 @@ const server = new McpServer(
     },
   );
 
-server.mcpMiddleware("tools/call", async (request, extra, next) => {
+server.mcpMiddleware(async (request, extra, next) => {
   const start = Date.now();
-  const tool = String(request.params?.name ?? "unknown");
-  const args = request.params?.arguments as Record<string, unknown> | undefined;
+  const method = request.method;
   const distinctId = extra?.sessionId;
+
+  // Build method-specific properties (e.g. tool name + args for tools/call).
+  const properties: Record<string, unknown> = {};
+  if (method === "tools/call") {
+    const params = request.params as
+      | { name?: unknown; arguments?: Record<string, unknown> }
+      | undefined;
+    properties.tool = params?.name ?? null;
+    properties.username = params?.arguments?.username ?? null;
+  }
+
+  // On initialize, attach the MCP client identity to the session.
+  if (method === "initialize" && distinctId) {
+    const clientInfo = (request.params as { clientInfo?: unknown } | undefined)
+      ?.clientInfo as { name?: string; version?: string } | undefined;
+    identifyClient(distinctId, clientInfo?.name ?? null, clientInfo?.version ?? null);
+  }
 
   try {
     const result = await next();
-    captureToolCall({
-      tool,
+    const isError =
+      typeof result === "object" &&
+      result !== null &&
+      (result as { isError?: unknown }).isError === true;
+    captureMcpRequest({
+      method,
       durationMs: Date.now() - start,
-      success: result?.isError !== true,
+      success: !isError,
       distinctId,
-      properties: { username: args?.username ?? null },
+      properties,
     });
     return result;
   } catch (err) {
-    captureToolCall({
-      tool,
+    captureMcpRequest({
+      method,
       durationMs: Date.now() - start,
       success: false,
       distinctId,
-      properties: { username: args?.username ?? null, error: String(err) },
+      properties: { ...properties, error: String(err) },
     });
     throw err;
   }

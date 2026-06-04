@@ -13,3 +13,5 @@ dist/
 .claude/
 .alpic/
 .opencode/
+.mcp.json
+opencode.json
