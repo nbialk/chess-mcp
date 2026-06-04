@@ -2,6 +2,8 @@
 
 An MCP / ChatGPT App that looks up Chess.com player stats and recent games, built with the [Skybridge](https://docs.skybridge.tech) framework.
 
+**Live demo:** [chess.niklas.sh](https://chess.niklas.sh/)
+
 ## Tools
 
 - **get-chess-player** — Look up a Chess.com player by username and show their profile and game statistics (rapid, blitz, bullet ratings and win/loss records).
