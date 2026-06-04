@@ -56,7 +56,7 @@ const lastGameSchema = z.object({
 const server = new McpServer(
   {
     name: "chess-app",
-    version: "0.0.1",
+    version: process.env.APP_VERSION ?? "0.0.0",
   },
   { capabilities: {} },
 )
