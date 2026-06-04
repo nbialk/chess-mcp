@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.3.0](https://github.com/nbialk/chess-mcp/compare/v0.2.1...v0.3.0) (2026-06-04)
+
+
+### Features
+
+* **analytics:** track all MCP methods and client identity ([cabe0fa](https://github.com/nbialk/chess-mcp/commit/cabe0fae9fdf939c9d456b5f17ddc6255f03cedf))
+
+
+### Documentation
+
+* **readme:** point badge to live demo; add agent shim sync script ([c9d3cc1](https://github.com/nbialk/chess-mcp/commit/c9d3cc1c49aea61bf33c8c2cebeec57620d19478))
+
 ## [0.2.0](https://github.com/nbialk/chess-mcp/compare/v0.1.0...v0.2.0) (2026-06-04)
 
 
