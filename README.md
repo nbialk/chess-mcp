@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="https://docs.skybridge.tech"><img src="https://img.shields.io/badge/Skybridge-1.0.3-2563eb?style=flat-square&logo=react&logoColor=white" alt="Skybridge" /></a>
-  <a href="https://chess.niklas.sh/"><img src="https://img.shields.io/badge/Demo-chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="Demo" /></a>
+  <a href="https://mcp.chess.niklas.sh/mcp"><img src="https://img.shields.io/badge/MCP-mcp.chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="MCP endpoint" /></a>
 </p>
 
 
@@ -109,16 +109,19 @@ Repository **variables**: `GCP_REGION`, `POSTHOG_HOST` (e.g.
 
 ### Custom domain
 
-Map your domain via Cloud Run (managed TLS is provisioned automatically):
+The service is mapped to `mcp.chess.niklas.sh` via Cloud Run domain mapping
+(managed TLS is provisioned automatically):
 
 ```bash
-gcloud run domain-mappings create \
+gcloud beta run domain-mappings create \
   --service chess-mcp \
-  --domain chess.niklas.sh \
+  --domain mcp.chess.niklas.sh \
   --region "$GCP_REGION"
 ```
 
-Then add the DNS records that the command prints to your DNS provider.
+Then add the DNS records that the command prints to your DNS provider (a
+`CNAME` to `ghs.googlehosted.com.`). Certificate provisioning can take from a
+few minutes up to 24 hours.
 
 ## Resources
 
