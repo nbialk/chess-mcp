@@ -57,7 +57,16 @@ const lastGameSchema = z.object({
 const server = new McpServer(
   {
     name: "chess-app",
+    title: "Chess MCP",
     version: process.env.APP_VERSION ?? "0.0.0",
+    websiteUrl: "https://mcp.chess.niklas.sh",
+    icons: [
+      {
+        src: "https://mcp.chess.niklas.sh/icon.png",
+        mimeType: "image/png",
+        sizes: ["500x500"],
+      },
+    ],
   },
   { capabilities: {} },
 )
@@ -355,25 +364,32 @@ server.mcpMiddleware("tools/call", async (request, extra, next) => {
   }
 });
 
-// Serve a favicon so MCP clients (e.g. Claude) show the app icon instead of
-// falling back to the root domain's favicon.
-const faviconUrl = new URL("./assets/favicon.ico", import.meta.url);
-const faviconPromise = readFile(faviconUrl).catch(() => null);
-type FaviconResponse = {
+type AssetResponse = {
   status(code: number): { end(): void };
   set(field: string, value: string): void;
   send(body: Buffer): void;
 };
-server.express.get("/favicon.ico", async (_req: unknown, res: FaviconResponse) => {
-  const favicon = await faviconPromise;
-  if (!favicon) {
-    res.status(404).end();
-    return;
-  }
-  res.set("Content-Type", "image/x-icon");
-  res.set("Cache-Control", "public, max-age=86400");
-  res.send(favicon);
-});
+
+const serveAsset = (route: string, file: string, contentType: string) => {
+  const assetUrl = new URL(`./assets/${file}`, import.meta.url);
+  const assetPromise = readFile(assetUrl).catch(() => null);
+  server.express.get(route, async (_req: unknown, res: AssetResponse) => {
+    const asset = await assetPromise;
+    if (!asset) {
+      res.status(404).end();
+      return;
+    }
+    res.set("Content-Type", contentType);
+    res.set("Cache-Control", "public, max-age=86400");
+    res.send(asset);
+  });
+};
+
+// Serve a favicon and app icon so MCP clients (e.g. Claude) show the app icon
+// instead of falling back to the root domain's favicon. The icon is referenced
+// from `serverInfo.icons` and must be a PNG for broad client support.
+serveAsset("/favicon.ico", "favicon.ico", "image/x-icon");
+serveAsset("/icon.png", "icon.png", "image/png");
 
 if (process.env.NODE_ENV === "production") {
   const { default: manifest } = await import("./vite-manifest.js");
