@@ -1,8 +1,12 @@
-# chess-mcp
+<p align="center">
+  <img src="./public/demo-banner.png" alt="chess-mcp demo" />
+</p>
 
-An MCP / ChatGPT App that looks up Chess.com player stats and recent games, built with the [Skybridge](https://docs.skybridge.tech) framework.
+<p align="center">
+  <a href="https://docs.skybridge.tech"><img src="https://img.shields.io/badge/Skybridge-1.0.3-2563eb?style=flat-square&logo=react&logoColor=white" alt="Skybridge" /></a>
+  <a href="https://chess.niklas.sh/"><img src="https://img.shields.io/badge/Demo-chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="Demo" /></a>
+</p>
 
-**Live demo:** [chess.niklas.sh](https://chess.niklas.sh/)
 
 ## Tools
 
