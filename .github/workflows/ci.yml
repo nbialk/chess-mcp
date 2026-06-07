@@ -24,3 +24,41 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm build
+
+  mcplint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      - name: Start MCP server
+        run: pnpm start &
+
+      - name: Wait for MCP server
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf -o /dev/null \
+              -X POST http://localhost:3000/mcp \
+              -H "Content-Type: application/json" \
+              -H "Accept: application/json, text/event-stream" \
+              -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"ci","version":"1"}}}'; then
+              echo "MCP server is up"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "MCP server did not start in time" >&2
+          exit 1
+
+      - name: Lint MCP tool definitions
+        run: npx -y -p @nbialk/mcplint@1 -c 'mcplint --url http://localhost:3000/mcp'
