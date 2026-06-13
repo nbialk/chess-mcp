@@ -5,22 +5,26 @@
 <p align="center">
   <a href="https://docs.skybridge.tech"><img src="https://img.shields.io/badge/Skybridge-1.0.4-2563eb?style=flat-square&logo=react&logoColor=white" alt="Skybridge" /></a>
   <a href="https://chess.niklas.sh"><img src="https://img.shields.io/badge/Demo-chess.niklas.sh-7c3aed?style=flat-square&logo=lichess&logoColor=white" alt="Live demo" /></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Beerware-fbbf24?style=flat-square" alt="License: Beerware" /></a>
 </p>
 
-A [Skybridge](https://docs.skybridge.tech) MCP app that looks up Chess.com
-players, games, and the daily puzzle — each tool ships with its own interactive
-React view.
+A reference example for building **MCP apps with interactive React views** —
+where each tool ships with its own view instead of returning plain text. Built
+with [Skybridge](https://docs.skybridge.tech), it looks up Chess.com players,
+games, and the daily puzzle, and runs in ChatGPT and Claude.
 
-## Contents
+## Try it
 
-- [Tools](#tools)
-- [Getting Started](#getting-started)
-- [Project Structure](#project-structure)
-- [Testing](#testing)
-- [Analytics](#analytics)
-- [Deployment](#deployment)
-- [Resources](#resources)
-- [License](#license)
+- **Live demo:** [chess.niklas.sh](https://chess.niklas.sh)
+- **MCP server URL:** `https://mcp.chess.niklas.sh/mcp`
+
+Just add the MCP server URL to any compatible client (ChatGPT, Claude, etc.) —
+that's it. Then ask things like _"show me magnuscarlsen's last game"_ or
+_"give me today's chess puzzle"_.
+
+<p align="center">
+  <img src="./public/demo-get_daily_puzzle_claude.gif" alt="Solving the daily puzzle in Claude" width="600" />
+</p>
 
 ## Tools
 
@@ -81,75 +85,11 @@ Unit tests run with [Vitest](https://vitest.dev): `pnpm test`.
 
 To connect with web clients like ChatGPT or Claude, expose your server with the `--tunnel` flag (`pnpm dev:tunnel`). See the [test guide](https://docs.skybridge.tech/quickstart/test-your-app).
 
-## Analytics
+## Deployment & Analytics
 
-Tool calls can be tracked with [PostHog](https://posthog.com). Tracking is
-wired as MCP middleware in [`src/server.ts`](./src/server.ts) and is a **no-op**
-unless `POSTHOG_API_KEY` is set, so forks and local development send no events.
-
-Copy [`.env.example`](./.env.example) to `.env` and set the keys to enable it locally:
-
-```bash
-cp .env.example .env
-```
-
-Use the PostHog **Project** API Key (`phc_...`), never a Personal API Key. No
-key value is ever committed — only read from the environment.
-
-## Deployment
-
-Deployments target [**Google Cloud Run**](https://cloud.google.com/run) and are
-driven by SemVer release tags. CI (lint, typecheck, build, test) runs on every
-PR via [`.github/workflows/ci.yml`](./.github/workflows/ci.yml).
-
-### Release flow
-
-1. Land changes on `main` using [Conventional Commits](https://www.conventionalcommits.org/)
-   (`feat:` → minor, `fix:` → patch, `feat!:`/`BREAKING CHANGE:` → major).
-2. [`release-please`](https://github.com/googleapis/release-please) opens a
-   release PR with the version bump and [`CHANGELOG.md`](./CHANGELOG.md), driven
-   by [`release-please-config.json`](./release-please-config.json).
-3. Merging that PR creates a `vX.Y.Z` tag and GitHub Release.
-4. The `deploy` job in
-   [`.github/workflows/release-please.yml`](./.github/workflows/release-please.yml)
-   then builds the [`Dockerfile`](./Dockerfile) image, pushes it to
-   [Artifact Registry](https://cloud.google.com/artifact-registry) (tagged
-   `X.Y.Z` and `latest`), and deploys to Cloud Run.
-
-### One-time GCP setup
-
-- Enable APIs: `run`, `cloudbuild`, `artifactregistry`, `iamcredentials`,
-  `secretmanager`.
-- Create an Artifact Registry Docker repo named `chess-mcp`.
-- Set up [Workload Identity Federation](https://github.com/google-github-actions/auth#preferred-direct-workload-identity-federation)
-  for GitHub Actions and a service account with roles `run.admin`,
-  `artifactregistry.writer`, `iam.serviceAccountUser`, and
-  `secretmanager.secretAccessor`.
-- Store the PostHog project key in Secret Manager as `posthog-api-key`.
-
-### GitHub configuration
-
-Repository **secrets**: `GCP_PROJECT_ID`, `GCP_WIF_PROVIDER`,
-`GCP_SERVICE_ACCOUNT`.
-
-Repository **variables**: `GCP_REGION`, `POSTHOG_HOST` (e.g.
-`https://eu.i.posthog.com`).
-
-### Custom domain
-
-The service is mapped to `mcp.chess.niklas.sh` via Cloud Run domain mapping
-(managed TLS is provisioned automatically):
-
-```bash
-gcloud beta run domain-mappings create \
-  --service chess-mcp \
-  --domain mcp.chess.niklas.sh \
-  --region "$GCP_REGION"
-```
-
-Then add the DNS records that the command prints to your DNS provider (a
-`CNAME` to `ghs.googlehosted.com.`). Certificate provisioning can take from a
-few minutes up to 24 hours.
+This app deploys to Google Cloud Run via release-please, and tool calls can be
+tracked with PostHog (no-op unless configured). See
+[`docs/deployment.md`](./docs/deployment.md) for the full setup.
 
 ## Resources
 
