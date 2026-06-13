@@ -18,3 +18,8 @@ opencode.json
 
 plans/
 scripts/agents/
+
+# quiver-cli: agent config is local-only tooling, not committed
+quiver.lock
+CLAUDE.md
+.env.local
