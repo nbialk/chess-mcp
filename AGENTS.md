@@ -1,6 +1,6 @@
 # AGENTS.md
 
-This is a ChatGPT/MCP app built with [Skybridge](https://docs.skybridge.tech)
+This is an MCP App built with [Skybridge](https://docs.skybridge.tech)
 (MCP server + one React view per tool). It looks up Chess.com players and
 games via the chess.com public API.
 
