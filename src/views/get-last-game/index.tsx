@@ -20,11 +20,11 @@ import { PlayerBar } from "./player-bar.js";
 
 export default function GetLastGame() {
   const { theme } = useLayout();
-  const { input, output, isPending } = useToolInfo<"get-last-game">();
+  const { input, output, isPending, responseMetadata } =
+    useToolInfo<"get-last-game">();
   const openExternal = useOpenExternal();
 
-  const game = output?.found ? output.game : undefined;
-  const positions = game?.positions ?? [];
+  const positions = responseMetadata?.positions ?? [];
   const [ply, setPly] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
@@ -83,6 +83,7 @@ export default function GetLastGame() {
   }
 
   const g = output.game;
+  const gameUrl = g.url;
   const result = RESULT_STYLES[g.result];
   const TimeIcon = g.timeClass ? TIME_ICONS[g.timeClass] : undefined;
   const timeLabel = g.timeClass
@@ -253,10 +254,10 @@ export default function GetLastGame() {
         <span className="type-text-xs text-muted-foreground">
           {g.endTime != null ? timeAgo(g.endTime) : ""}
         </span>
-        {g.url && (
+        {gameUrl && (
           <button
             type="button"
-            onClick={() => openExternal(g.url)}
+            onClick={() => openExternal(gameUrl)}
             className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-1.5 type-text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600"
           >
             View game

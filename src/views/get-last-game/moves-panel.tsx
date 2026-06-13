@@ -1,18 +1,5 @@
 import { useEffect, useRef } from "react";
-
-type MoveRow = { number: number; white?: string; black?: string };
-
-function toMoveRows(moves: string[]): MoveRow[] {
-  const rows: MoveRow[] = [];
-  for (let i = 0; i < moves.length; i += 2) {
-    rows.push({
-      number: i / 2 + 1,
-      white: moves[i],
-      black: moves[i + 1],
-    });
-  }
-  return rows;
-}
+import { toMoveRows } from "./lib.js";
 
 export function MovesPanel({
   opening,
