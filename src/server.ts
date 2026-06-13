@@ -5,7 +5,6 @@ if (process.env.PORT && !process.env.__PORT) {
 }
 
 import { readFile } from "node:fs/promises";
-import { Chess } from "chess.js";
 import { McpServer } from "skybridge/server";
 import { z } from "zod";
 import {
@@ -13,6 +12,17 @@ import {
   identifyClient,
   shutdownAnalytics,
 } from "./analytics.js";
+import {
+  buildReplay,
+  extractOpening,
+  fetchArchiveGames,
+  fetchArchiveUrls,
+  fetchProfile,
+  fetchStats,
+  formatMode,
+  mapGameResult,
+  pgnTag,
+} from "./chess-com.js";
 
 const modeSchema = z
   .object({
@@ -112,24 +122,9 @@ const server = new McpServer(
     async ({ username }) => {
       const handle = username.trim().toLowerCase();
 
-      const fetchJson = async (url: string) => {
-        try {
-          const res = await fetch(url, {
-            headers: { "User-Agent": "skybridge-chess-app" },
-            signal: AbortSignal.timeout(10_000),
-          });
-          if (!res.ok) return null;
-          return await res.json();
-        } catch {
-          return null;
-        }
-      };
-
       const [profile, stats] = await Promise.all([
-        fetchJson(`https://api.chess.com/pub/player/${encodeURIComponent(handle)}`),
-        fetchJson(
-          `https://api.chess.com/pub/player/${encodeURIComponent(handle)}/stats`,
-        ),
+        fetchProfile(handle),
+        fetchStats(handle),
       ]);
 
       if (!profile) {
@@ -141,17 +136,6 @@ const server = new McpServer(
           isError: false,
         };
       }
-
-      const formatMode = (mode: any) =>
-        mode
-          ? {
-              rating: mode.last?.rating ?? null,
-              best: mode.best?.rating ?? null,
-              win: mode.record?.win ?? 0,
-              loss: mode.record?.loss ?? 0,
-              draw: mode.record?.draw ?? 0,
-            }
-          : null;
 
       const player = {
         username: profile.username,
@@ -228,19 +212,6 @@ const server = new McpServer(
     async ({ username }) => {
       const handle = username.trim().toLowerCase();
 
-      const fetchJson = async (url: string) => {
-        try {
-          const res = await fetch(url, {
-            headers: { "User-Agent": "skybridge-chess-app" },
-            signal: AbortSignal.timeout(10_000),
-          });
-          if (!res.ok) return null;
-          return await res.json();
-        } catch {
-          return null;
-        }
-      };
-
       const notFound = {
         structuredContent: { found: false as const, username: handle },
         content: [
@@ -252,64 +223,23 @@ const server = new McpServer(
         isError: false,
       };
 
-      const archives = await fetchJson(
-        `https://api.chess.com/pub/player/${encodeURIComponent(handle)}/games/archives`,
-      );
-      const archiveUrls: string[] = archives?.archives ?? [];
+      const archiveUrls = await fetchArchiveUrls(handle);
       if (archiveUrls.length === 0) return notFound;
 
-      const month = await fetchJson(archiveUrls[archiveUrls.length - 1]);
-      const games: any[] = month?.games ?? [];
+      const games = await fetchArchiveGames(archiveUrls[archiveUrls.length - 1]);
       const game = games[games.length - 1];
       if (!game) return notFound;
 
-      const pgn: string = game.pgn ?? "";
-      const tag = (name: string) =>
-        pgn.match(new RegExp(`\\[${name} "(.*?)"\\]`))?.[1] ?? null;
+      const pgn = game.pgn ?? "";
 
-      const ecoUrl = tag("ECOUrl");
-      const opening = ecoUrl
-        ? decodeURIComponent(ecoUrl.split("/").pop() ?? "")
-            .replace(/-/g, " ")
-            .trim() || null
-        : null;
-
-      let positions: string[] = [];
-      let moves: string[] = [];
-      try {
-        const chess = new Chess();
-        chess.loadPgn(pgn);
-        const history = chess.history();
-        const replay = new Chess();
-        positions = [replay.fen()];
-        for (const san of history) {
-          replay.move(san);
-          positions.push(replay.fen());
-          moves.push(san);
-        }
-      } catch {
-        positions = [];
-        moves = [];
-      }
+      const opening = extractOpening(pgnTag(pgn, "ECOUrl"));
+      const { positions, moves } = buildReplay(pgn);
 
       const isWhite = game.white?.username?.toLowerCase() === handle;
       const me = isWhite ? game.white : game.black;
       const opponent = isWhite ? game.black : game.white;
 
-      const drawResults = [
-        "agreed",
-        "repetition",
-        "stalemate",
-        "insufficient",
-        "50move",
-        "timevsinsufficient",
-      ];
-      const result: "win" | "draw" | "loss" =
-        me?.result === "win"
-          ? "win"
-          : drawResults.includes(me?.result)
-            ? "draw"
-            : "loss";
+      const result = mapGameResult(me?.result);
 
       const lastGame = {
         result,
@@ -321,7 +251,7 @@ const server = new McpServer(
         rated: game.rated ?? null,
         endTime: game.end_time ?? null,
         opening,
-        termination: tag("Termination"),
+        termination: pgnTag(pgn, "Termination"),
         url: game.url ?? null,
         moves,
       };
