@@ -54,7 +54,6 @@ const lastGameSchema = z.object({
   opening: z.string().nullable(),
   termination: z.string().nullable(),
   url: z.string().nullable(),
-  positions: z.array(z.string()),
   moves: z.array(z.string()),
 });
 
@@ -324,7 +323,6 @@ const server = new McpServer(
         opening,
         termination: tag("Termination"),
         url: game.url ?? null,
-        positions,
         moves,
       };
 
@@ -347,6 +345,7 @@ const server = new McpServer(
           game: lastGame,
         },
         content: [{ type: "text", text: summary }],
+        _meta: { positions },
         isError: false,
       };
     },

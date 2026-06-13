@@ -20,11 +20,11 @@ import { PlayerBar } from "./player-bar.js";
 
 export default function GetLastGame() {
   const { theme } = useLayout();
-  const { input, output, isPending } = useToolInfo<"get-last-game">();
+  const { input, output, isPending, responseMetadata } =
+    useToolInfo<"get-last-game">();
   const openExternal = useOpenExternal();
 
-  const game = output?.found ? output.game : undefined;
-  const positions = game?.positions ?? [];
+  const positions = responseMetadata?.positions ?? [];
   const [ply, setPly] = useState<number | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
