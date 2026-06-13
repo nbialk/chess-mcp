@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/nbialk/chess-mcp/compare/v0.4.0...v0.4.1) (2026-06-13)
+
+
+### Documentation
+
+* **readme:** slim README and add Claude demo ([2e8f5da](https://github.com/nbialk/chess-mcp/commit/2e8f5da8692173eb4ba2f1cfba4121fcba59a9b0))
+
 ## [0.4.0](https://github.com/nbialk/chess-mcp/compare/v0.3.1...v0.4.0) (2026-06-13)
 
 
