@@ -73,5 +73,6 @@ jobs:
             --region "${{ vars.GCP_REGION }}" \
             --platform managed \
             --allow-unauthenticated \
+            --memory 256Mi \
             --set-env-vars "POSTHOG_HOST=${{ vars.POSTHOG_HOST }},APP_VERSION=$VERSION" \
             --update-secrets "POSTHOG_API_KEY=posthog-api-key:latest"
