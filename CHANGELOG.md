@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/nbialk/chess-mcp/compare/v0.3.1...v0.4.0) (2026-06-13)
+
+
+### Features
+
+* **puzzle:** add interactive get-daily-puzzle tool ([cab60a3](https://github.com/nbialk/chess-mcp/commit/cab60a3c58752820a335ca77928bc57d278e1470))
+
+
+### Documentation
+
+* **readme:** restructure with contents, table, and repo links ([bf6cfbc](https://github.com/nbialk/chess-mcp/commit/bf6cfbced9063ceb0f00f9dd5c5fc9bd3311879f))
+
 ## [0.3.1](https://github.com/nbialk/chess-mcp/compare/v0.3.0...v0.3.1) (2026-06-13)
 
 
