@@ -114,16 +114,23 @@ const server = new McpServer(
       const handle = username.trim().toLowerCase();
 
       const fetchJson = async (url: string) => {
-        const res = await fetch(url, {
-          headers: { "User-Agent": "skybridge-chess-app" },
-        });
-        if (!res.ok) return null;
-        return res.json();
+        try {
+          const res = await fetch(url, {
+            headers: { "User-Agent": "skybridge-chess-app" },
+            signal: AbortSignal.timeout(10_000),
+          });
+          if (!res.ok) return null;
+          return await res.json();
+        } catch {
+          return null;
+        }
       };
 
       const [profile, stats] = await Promise.all([
-        fetchJson(`https://api.chess.com/pub/player/${handle}`),
-        fetchJson(`https://api.chess.com/pub/player/${handle}/stats`),
+        fetchJson(`https://api.chess.com/pub/player/${encodeURIComponent(handle)}`),
+        fetchJson(
+          `https://api.chess.com/pub/player/${encodeURIComponent(handle)}/stats`,
+        ),
       ]);
 
       if (!profile) {
@@ -132,7 +139,7 @@ const server = new McpServer(
           content: [
             { type: "text", text: `No Chess.com player found for "${username}".` },
           ],
-          isError: true,
+          isError: false,
         };
       }
 
@@ -223,11 +230,16 @@ const server = new McpServer(
       const handle = username.trim().toLowerCase();
 
       const fetchJson = async (url: string) => {
-        const res = await fetch(url, {
-          headers: { "User-Agent": "skybridge-chess-app" },
-        });
-        if (!res.ok) return null;
-        return res.json();
+        try {
+          const res = await fetch(url, {
+            headers: { "User-Agent": "skybridge-chess-app" },
+            signal: AbortSignal.timeout(10_000),
+          });
+          if (!res.ok) return null;
+          return await res.json();
+        } catch {
+          return null;
+        }
       };
 
       const notFound = {
@@ -238,11 +250,11 @@ const server = new McpServer(
             text: `No recent Chess.com game found for "${username}".`,
           },
         ],
-        isError: true,
+        isError: false,
       };
 
       const archives = await fetchJson(
-        `https://api.chess.com/pub/player/${handle}/games/archives`,
+        `https://api.chess.com/pub/player/${encodeURIComponent(handle)}/games/archives`,
       );
       const archiveUrls: string[] = archives?.archives ?? [];
       if (archiveUrls.length === 0) return notFound;
