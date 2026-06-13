@@ -13,8 +13,8 @@ import {
 import { useEffect, useState } from "react";
 import { useLayout, useOpenExternal } from "skybridge/web";
 import { useToolInfo } from "../../helpers.js";
-import { Board } from "./board.js";
-import { RESULT_STYLES, TIME_ICONS, timeAgo } from "./lib.js";
+import { Board } from "../shared/board.js";
+import { RESULT_STYLES, TIME_ICONS, timeAgo } from "../shared/lib.js";
 import { MovesPanel } from "./moves-panel.js";
 import { PlayerBar } from "./player-bar.js";
 

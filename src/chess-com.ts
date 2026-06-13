@@ -162,3 +162,44 @@ export function mapGameResult(
   if (result && DRAW_RESULTS.includes(result)) return "draw";
   return "loss";
 }
+
+export const dailyPuzzleSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  publish_time: z.number(),
+  fen: z.string(),
+  pgn: z.string(),
+  image: z.string(),
+});
+export type DailyPuzzle = z.infer<typeof dailyPuzzleSchema>;
+
+export async function fetchDailyPuzzle(): Promise<DailyPuzzle | null> {
+  const parsed = dailyPuzzleSchema.safeParse(
+    await fetchJson("https://api.chess.com/pub/puzzle"),
+  );
+  return parsed.success ? parsed.data : null;
+}
+
+export type SolutionMove = {
+  san: string;
+  from: string;
+  to: string;
+  promotion?: string;
+};
+
+// Replay the puzzle PGN from its starting FEN to recover the solution line as
+// verbose moves (so the view can auto-play replies and auto-match promotions).
+export function buildPuzzleSolution(fen: string, pgn: string): SolutionMove[] {
+  try {
+    const chess = new Chess(fen);
+    chess.loadPgn(pgn);
+    return chess.history({ verbose: true }).map((move) => ({
+      san: move.san,
+      from: move.from,
+      to: move.to,
+      ...(move.promotion ? { promotion: move.promotion } : {}),
+    }));
+  } catch {
+    return [];
+  }
+}

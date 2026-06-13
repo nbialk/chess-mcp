@@ -12,6 +12,7 @@ import {
   identifyClient,
   shutdownAnalytics,
 } from "./analytics.js";
+import { buildPuzzleSolution, fetchDailyPuzzle } from "./chess-com.js";
 import {
   buildReplay,
   extractOpening,
@@ -65,6 +66,22 @@ const lastGameSchema = z.object({
   termination: z.string().nullable(),
   url: z.string().nullable(),
   moves: z.array(z.string()),
+});
+
+const puzzleSchema = z.object({
+  title: z.string(),
+  url: z.string(),
+  fen: z.string(),
+  image: z.string(),
+  sideToMove: z.enum(["w", "b"]),
+  solution: z.array(
+    z.object({
+      san: z.string(),
+      from: z.string(),
+      to: z.string(),
+      promotion: z.string().optional(),
+    }),
+  ),
 });
 
 const server = new McpServer(
@@ -276,6 +293,81 @@ const server = new McpServer(
         },
         content: [{ type: "text", text: summary }],
         _meta: { positions },
+        isError: false,
+      };
+    },
+  )
+  .registerTool(
+    {
+      name: "get-daily-puzzle",
+      description:
+        "Get the Chess.com daily puzzle as an interactive board to solve. Returns the starting position, the side to move, and the solution line so the player can attempt the moves and get feedback.",
+      inputSchema: {},
+      outputSchema: {
+        found: z.boolean(),
+        puzzle: puzzleSchema.optional(),
+      },
+      annotations: {
+        title: "Get Chess.com daily puzzle",
+        readOnlyHint: true,
+        idempotentHint: true,
+        destructiveHint: false,
+        openWorldHint: true,
+      },
+      _meta: {
+        "openai/toolInvocation/invoking":
+          "Fetching the daily puzzle from Chess.com…",
+        "openai/toolInvocation/invoked": "Daily puzzle ready.",
+      },
+      view: {
+        component: "get-daily-puzzle",
+        description: "Chess.com daily puzzle solver",
+        csp: {
+          resourceDomains: ["https://www.chess.com"],
+          redirectDomains: ["https://www.chess.com"],
+        },
+      },
+    },
+    async () => {
+      const puzzle = await fetchDailyPuzzle();
+
+      if (!puzzle) {
+        return {
+          structuredContent: { found: false as const },
+          content: [
+            {
+              type: "text",
+              text: "Could not fetch the Chess.com daily puzzle.",
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      const sideToMove = puzzle.fen.split(" ")[1] === "b" ? "b" : "w";
+      const solution = buildPuzzleSolution(puzzle.fen, puzzle.pgn);
+
+      const summary = [
+        `Daily puzzle: ${puzzle.title}`,
+        `${sideToMove === "w" ? "White" : "Black"} to move`,
+        solution.length > 0 ? `${solution.length}-move solution` : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+
+      return {
+        structuredContent: {
+          found: true as const,
+          puzzle: {
+            title: puzzle.title,
+            url: puzzle.url,
+            fen: puzzle.fen,
+            image: puzzle.image,
+            sideToMove,
+            solution,
+          },
+        },
+        content: [{ type: "text", text: summary }],
         isError: false,
       };
     },

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { toMoveRows } from "./lib.js";
+import { toMoveRows } from "../shared/lib.js";
 
 export function MovesPanel({
   opening,
