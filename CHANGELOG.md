@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.3.1](https://github.com/nbialk/chess-mcp/compare/v0.3.0...v0.3.1) (2026-06-13)
+
+
+### Bug Fixes
+
+* **server:** add fetch timeouts, URL-encode usernames, soften not-found results ([ff1e571](https://github.com/nbialk/chess-mcp/commit/ff1e5712799f3be341f03e8db5676b453d3973fe))
+
+
+### Performance Improvements
+
+* **server:** move board replay positions to _meta to cut model context ([2da24a0](https://github.com/nbialk/chess-mcp/commit/2da24a06658e5f7ebdf7207af37c942bc69106ef))
+
+
+### Code Refactoring
+
+* **server:** extract typed chess.com client with zod boundary ([1e8bd2d](https://github.com/nbialk/chess-mcp/commit/1e8bd2d29af0b2d5d4c54d42ba90589f5d35e26c))
+
+
+### Documentation
+
+* **agents:** replace missing-skill instruction with accurate repo guide ([f307ac8](https://github.com/nbialk/chess-mcp/commit/f307ac8a7ca892fc02ce65a3e2ef8ae8edea879f))
+* **plans:** add improvement implementation plans ([3b4b24f](https://github.com/nbialk/chess-mcp/commit/3b4b24f233d48adea96d4ae31ba7ca2c88dec0c5))
+* **plans:** mark improvement plans as done ([8d040d0](https://github.com/nbialk/chess-mcp/commit/8d040d0a06dd1f088eef38c9ff61335c6c36ef92))
+
 ## [0.3.0](https://github.com/nbialk/chess-mcp/compare/v0.2.1...v0.3.0) (2026-06-04)
 
 
