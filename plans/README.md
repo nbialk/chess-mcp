@@ -7,14 +7,35 @@ your row when done.
 
 ## Execution order & status
 
+All six executed on branch `advisor/improve` (worktree
+`../chess-mcp-advisor`), reviewed and approved. Not merged — that is the
+maintainer's call.
+
 | Plan | Title                                                        | Priority | Effort | Depends on   | Status |
 |------|--------------------------------------------------------------|----------|--------|--------------|--------|
-| 001  | Harden chess.com fetches + soften not-found `isError`        | P1       | S      | —            | TODO   |
-| 002  | Move board replay positions out of model context (`_meta`)   | P1       | S      | — (after 001 preferred) | TODO |
-| 003  | Vitest baseline + tests for pure helpers                     | P2       | M      | —            | TODO   |
-| 004  | Extract typed chess.com client, remove `any`                 | P2       | M      | 003 (hard); 001, 002 (ordering) | TODO |
-| 005  | Rewrite AGENTS.md with accurate agent guidance               | P3       | S      | — (content adapts to 003/006) | TODO |
-| 006  | ESLint gate + `typecheck` script                             | P3       | S      | 004 (hard)   | TODO   |
+| 001  | Harden chess.com fetches + soften not-found `isError`        | P1       | S      | —            | DONE (commit ff1e571) |
+| 002  | Move board replay positions out of model context (`_meta`)   | P1       | S      | — (after 001 preferred) | DONE (commit 2da24a0) |
+| 003  | Vitest baseline + tests for pure helpers                     | P2       | M      | —            | DONE (commit 9e43af3) |
+| 004  | Extract typed chess.com client, remove `any`                 | P2       | M      | 003 (hard); 001, 002 (ordering) | DONE (commit 1e8bd2d) |
+| 005  | Rewrite AGENTS.md with accurate agent guidance               | P3       | S      | — (content adapts to 003/006) | DONE (commit f307ac8) |
+| 006  | ESLint gate + `typecheck` script                             | P3       | S      | 004 (hard)   | DONE (commit 91a44d0) |
+
+### Execution notes (deviations from plan, judged on merit)
+
+- **004** touched one out-of-scope file, `src/views/get-last-game/index.tsx`:
+  the typed `Game.url` (`string | null`) exposed a latent unsafety the old
+  `any` masked — `openExternal(g.url)` could receive `null`. Fixed by
+  capturing the narrowed value in a `const gameUrl` and guarding on it
+  (type-safe; no `!` assertion). Necessary to keep `tsc` green branch-wide.
+- **006** refined in place: react-hooks v7's `recommended` preset bundles 16
+  rules (incl. `set-state-in-effect`, which flags the working autoplay
+  effect). Narrowed to the two correctness rules the plan intended
+  (`rules-of-hooks` error, `exhaustive-deps` warn) and excluded `scripts/`
+  (tooling, like the ignored `dist`/`plans`). Zero source files needed lint
+  fixes; no rule silently downgraded to hide a real bug.
+
+Branch HEAD verification (all green): `pnpm lint`, `pnpm typecheck`,
+`pnpm test` (27 tests), `pnpm build`.
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with one-line reason) |
 REJECTED (with one-line rationale).
