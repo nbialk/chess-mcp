@@ -25,6 +25,8 @@ jobs:
 
       - run: pnpm build
 
+      - run: pnpm test
+
   mcplint:
     runs-on: ubuntu-latest
     steps:

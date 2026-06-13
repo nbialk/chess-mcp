@@ -19,6 +19,20 @@ export const RESULT_STYLES = {
   loss: { label: "Loss", className: "bg-rose-600 text-white" },
 } as const;
 
+export type MoveRow = { number: number; white?: string; black?: string };
+
+export function toMoveRows(moves: string[]): MoveRow[] {
+  const rows: MoveRow[] = [];
+  for (let i = 0; i < moves.length; i += 2) {
+    rows.push({
+      number: i / 2 + 1,
+      white: moves[i],
+      black: moves[i + 1],
+    });
+  }
+  return rows;
+}
+
 export function fenToRows(fen: string): string[][] {
   const placement = fen.split(" ")[0];
   return placement.split("/").map((row) => {

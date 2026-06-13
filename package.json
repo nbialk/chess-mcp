@@ -9,7 +9,8 @@
     "dev": "skybridge dev --no-open",
     "dev:tunnel": "skybridge dev --tunnel",
     "build": "skybridge build",
-    "start": "skybridge start"
+    "start": "skybridge start",
+    "test": "vitest run"
   },
   "dependencies": {
     "@alpic-ai/ui": "^1.122.0",
@@ -34,7 +35,8 @@
     "@vitejs/plugin-react": "^6.0.1",
     "tailwindcss": "^4.2.4",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=24.14.1"
